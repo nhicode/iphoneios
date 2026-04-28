@@ -1,1 +1,390 @@
+/* Reset cơ bản */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
+}
 
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1a1a24; /* Nền tối để tôn lên thiết kế điện thoại */
+    overflow: hidden;
+}
+
+/* Không gian 3D */
+.scene {
+    perspective: 1500px; /* Độ sâu của góc nhìn 3D */
+}
+
+/* Khung máy chính */
+.phone {
+    position: relative;
+    width: 320px; /* Đã thu nhỏ */
+    height: 660px;
+    border-radius: 50px;
+    /* Hiệu ứng góc xoay 3D */
+    transform-style: preserve-3d;
+    transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    
+    /* Màu khung Titanium thực tế */
+    background: linear-gradient(135deg, #dfdfdf 0%, #a6a6a6 50%, #878787 100%);
+    
+    /* Box-shadow nhiều lớp cực kỳ quan trọng để tạo độ dày 3D (Extrusion) */
+    box-shadow: 
+        inset 0 0 4px rgba(255, 255, 255, 0.8), /* Phản chiếu viền chói */
+        -1px 1px 0 #888,
+        -2px 2px 0 #858585,
+        -3px 3px 0 #808080,
+        -4px 4px 0 #7a7a7a,
+        -5px 5px 0 #757575,
+        -6px 6px 0 #707070,
+        -7px 7px 0 #6b6b6b,
+        -8px 8px 0 #656565,
+        -9px 9px 0 #606060,
+        -10px 10px 1px rgba(0,0,0,0.5), /* Viền tối chia cắt */
+        -20px 20px 30px rgba(0,0,0,0.6), /* Bóng đổ xuống bàn */
+        -40px 40px 60px rgba(0,0,0,0.4);
+}
+
+/* Cho phép xoay điện thoại bằng cách di chuột (Tương tác động) */
+.scene:hover .phone {
+    transform: rotateX(5deg) rotateY(-5deg) rotateZ(0deg);
+}
+
+/* Dải ăng-ten kim loại trên viền */
+.antenna {
+    position: absolute;
+    background-color: #666;
+    z-index: 1;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+.antenna-top-left { top: 40px; left: -1px; width: 3px; height: 5px; transform: rotateY(-90deg); }
+.antenna-bottom-left { bottom: 40px; left: -1px; width: 3px; height: 5px; transform: rotateY(-90deg); }
+.antenna-top-right { top: 40px; right: -1px; width: 3px; height: 5px; transform: rotateY(90deg); }
+.antenna-bottom-right { bottom: 40px; right: -1px; width: 3px; height: 5px; transform: rotateY(90deg); }
+
+/* Nút vật lý 3D */
+.button {
+    position: absolute;
+    background: linear-gradient(to right, #cfcfcf, #858585);
+    border-radius: 3px;
+    /* Bóng đổ của nút tạo cảm giác nhô ra */
+    box-shadow: 
+        -1px 1px 1px rgba(0,0,0,0.4),
+        -2px 2px 2px rgba(0,0,0,0.2),
+        inset 0 1px 1px rgba(255,255,255,0.5);
+    transform-style: preserve-3d;
+    transform: translateZ(-1px); /* Đẩy lùi về sau viền một chút */
+    transition: transform 0.1s;
+    cursor: pointer;
+}
+
+.button:active {
+    transform: translateZ(-1px) translateX(1px); /* Hiệu ứng lún khi bấm */
+}
+
+/* Nút Action (Horbar gạt rung kiểu mới) */
+.action-button {
+    top: 130px;
+    left: -4px;
+    width: 4px;
+    height: 24px;
+}
+
+.volume-up {
+    top: 180px;
+    left: -4px;
+    width: 4px;
+    height: 48px;
+}
+
+.volume-down {
+    top: 240px;
+    left: -4px;
+    width: 4px;
+    height: 48px;
+}
+
+.side-button {
+    top: 200px;
+    right: -4px;
+    width: 4px;
+    height: 70px;
+    background: linear-gradient(to left, #cfcfcf, #858585); /* Đổi hướng bóng */
+    box-shadow: 
+        1px 1px 1px rgba(0,0,0,0.4),
+        2px 2px 2px rgba(0,0,0,0.2),
+        inset 0 1px 1px rgba(255,255,255,0.5);
+}
+
+/* Viền đen màn hình (Bezel) */
+.bezel {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    background-color: #000;
+    border-radius: 44px;
+    /* Đổ bóng ngược vào trong để tạo cảm giác màn hình chìm xuống dưới mặt kính */
+    box-shadow: 
+        inset 0 0 4px rgba(255,255,255,0.2),
+        0 0 2px rgba(0,0,0,0.8);
+    padding: 6px;
+}
+
+/* Màn hình hiển thị chính */
+.screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 38px;
+    background-color: #111;
+    overflow: hidden;
+    /* Góc nhìn của màn hình phẳng */
+    transform: translateZ(1px); 
+}
+
+/* Hình nền lượn sóng động */
+.wallpaper {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 100%, #d5b895 0%, #6e5746 40%, #1a1614 100%);
+    background-size: 200% 200%;
+    animation: flow 15s ease infinite;
+}
+
+@keyframes flow {
+    0% { background-position: 50% 100%; }
+    50% { background-position: 50% 0%; }
+    100% { background-position: 50% 100%; }
+}
+
+/* Dynamic Island (Siêu chi tiết) */
+.dynamic-island {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95px;
+    height: 28px;
+    background-color: #000;
+    border-radius: 20px;
+    z-index: 20;
+    /* Độ bóng bẩy của cụm FaceID */
+    box-shadow: 
+        inset 0 0 3px rgba(255,255,255,0.1),
+        0 4px 10px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.dynamic-island:hover {
+    width: 140px;
+    height: 35px;
+}
+
+/* Camera ẩn bên trong Dynamic Island */
+.camera-lens {
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 30% 30%, #303454, #05060f);
+    border-radius: 50%;
+    box-shadow: inset 0 0 2px rgba(255,255,255,0.2);
+}
+
+.sensor {
+    width: 8px;
+    height: 8px;
+    background: #0a0a0a;
+    border-radius: 50%;
+    box-shadow: inset 0 0 1px rgba(255,255,255,0.1);
+}
+
+/* Thanh trạng thái (Status Bar) */
+.status-bar {
+    position: absolute;
+    top: 14px;
+    left: 0;
+    width: 100%;
+    padding: 0 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Icon Sóng */
+.signal {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 10px;
+}
+.signal span {
+    width: 2.5px;
+    background-color: white;
+    border-radius: 1px;
+}
+.signal span:nth-child(1) { height: 3px; }
+.signal span:nth-child(2) { height: 5px; }
+.signal span:nth-child(3) { height: 7px; }
+.signal span:nth-child(4) { height: 10px; background-color: rgba(255,255,255,0.3); } /* Cột cuối mờ */
+
+/* Icon Pin */
+.battery {
+    position: relative;
+    width: 20px;
+    height: 10px;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 3px;
+    padding: 1px;
+    margin-left: 2px;
+}
+.battery::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 2.5px;
+    width: 2px;
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 0 1px 1px 0;
+}
+.battery-level {
+    width: 85%;
+    height: 100%;
+    background-color: white;
+    border-radius: 1.5px;
+}
+
+/* Khu vực thông báo */
+.notifications {
+    position: absolute;
+    top: 160px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 5;
+}
+
+.notification {
+    background: rgba(30, 30, 30, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+.notification:hover { transform: scale(1.02); }
+
+.noti-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+}
+
+.noti-content { flex-grow: 1; }
+
+.noti-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.noti-name { color: white; font-weight: 600; font-size: 13px; }
+.noti-time { color: rgba(255,255,255,0.5); font-size: 11px; }
+.noti-text { color: rgba(255,255,255,0.8); font-size: 13px; }
+
+/* Nút điều khiển màn hình khóa (Đèn/Camera) */
+.lock-controls {
+    position: absolute;
+    bottom: 50px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 5;
+}
+
+.lock-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(30,30,30,0.6);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.lock-btn:active {
+    transform: scale(0.9);
+    background: rgba(255,255,255,0.2);
+}
+
+/* Thanh điều hướng (Home Bar) */
+.home-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background-color: white;
+    border-radius: 2px;
+    z-index: 10;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+.home-bar:hover { transform: translateX(-50%) translateY(-2px); }
+
+/* KÍNH PHẢN QUANG (Glossy Reflection) */
+/* Đây là lớp phủ làm cho toàn bộ màn hình trông giống mặt kính 3D */
+.screen-glass {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 44px;
+    pointer-events: none; /* Rất quan trọng: cho phép click xuyên qua lớp kính */
+    background: linear-gradient(
+        105deg, 
+        rgba(255,255,255,0.15) 0%, 
+        rgba(255,255,255,0.02) 40%, 
+        transparent 45%, 
+        transparent 100%
+    );
+    z-index: 50;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
