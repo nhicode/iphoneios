@@ -1,428 +1,85 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mô Hình iPhone Động</title>
-<style>
-/* Reset và Bối Cảnh */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f0f4f7; /* Nền xanh nhạt, sạch */
-  overflow: hidden;
-}
-
-/* Biến màu */
-:root {
-  --titanium-color: #d1c5b8; /* Màu Titanium Tự Nhiên */
-  --bezel-color: #1a1a1c;
-  --screen-bg-color: #f7e6d9; /* Màu nền cát */
-  --text-color: #1d1d1f;
-  --text-light-color: #86868b;
-  --notification-bg: rgba(255, 255, 255, 0.7);
-  --battery-green: #34c759;
-}
-
-/* Mô Hình Điện Thoại Tổng Thể */
-.phone-model {
-  position: relative;
-  width: 420px;
-  height: 870px;
-  border-radius: 60px;
-  background-color: var(--titanium-color);
-  background-image: 
-    linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
-    linear-gradient(to top, rgba(0,0,0,0.05) 1px, transparent 1px);
-  background-size: 5px 5px; /* Kết cấu Titanium xước nhẹ */
-  box-shadow: 
-    0 10px 40px rgba(0,0,0,0.15),
-    0 5px 15px rgba(0,0,0,0.1),
-    inset 0 -2px 5px rgba(255,255,255,0.2),
-    inset 0 2px 5px rgba(0,0,0,0.1);
-  overflow: visible; /* Cần để hiển thị các dải anten và nút */
-  transform: perspective(1000px) rotateX(10deg);
-  transition: transform 0.5s ease;
-}
-
-/* Hiệu ứng xoay khi hover vào mô hình */
-.phone-model:hover {
-  transform: perspective(1000px) rotateX(0deg);
-}
-
-/* Các dải anten */
-.phone-model::before, .phone-model::after {
-  content: '';
-  position: absolute;
-  background-color: #a89f94;
-  height: 3px;
-  width: 60px;
-}
-.phone-model::before { top: 50px; left: 0; border-radius: 0 1.5px 1.5px 0; }
-.phone-model::after { bottom: 50px; right: 0; border-radius: 1.5px 0 0 1.5px; }
-
-/* Các Nút Vật Lý */
-.button {
-  position: absolute;
-  background-color: var(--titanium-color);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 4px;
-  box-shadow: 
-    inset 0 1px 1px rgba(255,255,255,0.1),
-    0 2px 4px rgba(0,0,0,0.15);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.button:hover {
-  background-color: #dfd4c7;
-  transform: scale(1.03);
-}
-
-.button:active {
-  transform: scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.1);
-}
-
-/* Trái: Action Button, Volume Up/Down */
-.left-buttons {
-  position: absolute;
-  top: 150px;
-  left: -12px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.action-button { width: 10px; height: 35px; top: 0px; left: 0px;}
-.volume-up { width: 10px; height: 65px; top: 50px; left: 0px;}
-.volume-down { width: 10px; height: 65px; top: 130px; left: 0px;}
-
-/* Phải: Side Button */
-.side-button-container {
-    position: absolute;
-    top: 240px;
-    right: -12px;
-}
-.side-button { width: 10px; height: 100px; left: 0px; top: 0px;}
-
-/* Nhãn lơ lửng cho các nút */
-.button .label {
-  position: absolute;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  z-index: 100;
-}
-.left-buttons .button .label { left: 20px; top: 50%; transform: translateY(-50%); }
-.side-button-container .side-button .label { right: 20px; top: 50%; transform: translateY(-50%); }
-
-.button:hover .label {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Màn Hình */
-.screen {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  border-radius: 50px;
-  background-color: var(--bezel-color);
-  overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-}
-
-/* Nội dung màn hình khóa chính xác */
-.screen-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--screen-bg-color);
-  background-image: 
-    radial-gradient(at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 60%),
-    radial-gradient(at 90% 80%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
-  border-radius: 48px;
-  display: flex;
-  flex-direction: column;
-  padding: 0 20px;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
-}
-
-/* Hình nền lượn sóng động */
-.screen-content::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 200%;
-  height: 300px;
-  background: 
-    radial-gradient(ellipse at 50% -50%, rgba(230, 200, 160, 0.6) 0%, transparent 80%),
-    radial-gradient(ellipse at 80% 120%, rgba(230, 200, 160, 0.6) 0%, transparent 80%);
-  border-radius: 100% 100% 0 0;
-  transform: translateX(-25%) translateY(100px);
-  animation: wavePulse 8s infinite ease-in-out;
-  z-index: 1;
-}
-
-@keyframes wavePulse {
-  0%, 100% { transform: translateX(-25%) translateY(100px); }
-  50% { transform: translateX(-35%) translateY(80px) scaleY(1.05); }
-}
-
-/* Dynamic Island */
-.dynamic-island {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 32px;
-  background-color: #000;
-  border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  font-size: 9px;
-  font-weight: 600;
-  z-index: 10;
-  padding: 0 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
-  cursor: pointer;
-}
-
-.dynamic-island:hover {
-  width: 140px;
-  height: 36px;
-  border-radius: 24px;
-}
-
-.di-text { margin-right: auto; color: #fff;}
-.battery {
-  position: relative;
-  width: 11px;
-  height: 6px;
-  border: 1px solid #fff;
-  border-radius: 1px;
-  overflow: hidden;
-}
-.battery::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -2.5px;
-  width: 1.5px;
-  height: 2px;
-  background-color: #fff;
-  border-radius: 0 1px 1px 0;
-  transform: translateY(-50%);
-}
-.battery-level {
-  width: 80%;
-  height: 100%;
-  background-color: var(--battery-green);
-}
-
-/* Đồng hồ Thời Gian */
-.time {
-  position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 72px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -2.5px;
-  z-index: 5;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-/* Khu vực Thông báo */
-.notification-area {
-  position: absolute;
-  top: 200px;
-  left: 12px;
-  right: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 5;
-}
-
-.notification {
-  background-color: var(--notification-bg);
-  backdrop-filter: blur(25px);
-  border-radius: 18px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-start;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.18);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-}
-
-.notification:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-}
-
-/* Avatar và Biểu tượng */
-.noti-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  margin-right: 14px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 18px;
-}
-.avatar-sarah { background-color: #aeaeb2; }
-.message-icon { background-color: #1da1f2; } /* Màu tin nhắn */
-
-/* Nội dung văn bản thông báo */
-.noti-text { flex-grow: 1; }
-.noti-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
-  color: var(--text-color);
-  margin-bottom: 2px;
-}
-.time-ago {
-  font-weight: 400;
-  color: var(--text-light-color);
-  font-size: 13px;
-}
-.noti-body {
-  color: #3a3a3c;
-  font-size: 15px;
-}
-
-/* Các Biểu Tượng Dưới Cùng */
-.controls {
-  position: absolute;
-  bottom: 50px;
-  left: 30px;
-  right: 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #fff;
-  z-index: 5;
-}
-.control-icon {
-  font-size: 24px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-.control-icon:hover { transform: scale(1.1); }
-
-/* Thanh Ngang/Home Bar (HorBar) mà bạn yêu cầu */
-.home-bar {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 150px;
-  height: 6px;
-  background-color: #fff;
-  border-radius: 3px;
-  z-index: 10;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  cursor: grab;
-}
-
-/* Hiệu ứng lơ lửng cho Thanh ngang */
-.home-bar:hover {
-  opacity: 0.6;
-  transform: translateX(-50%) translateY(-2px);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone 15 Pro 3D Siêu Thực</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="phone-model">
-  
-  <div class="left-buttons">
-    <div class="button action-button">
-      <span class="label">Action Button (Mute)</span>
-    </div>
-    <div class="button volume-up">
-      <span class="label">Volume Up</span>
-    </div>
-    <div class="button volume-down">
-      <span class="label">Volume Down</span>
-    </div>
-  </div>
-  
-  <div class="side-button-container">
-    <div class="button side-button">
-      <span class="label">Side Button</span>
-    </div>
-  </div>
+    <div class="scene">
+        <div class="phone">
+            <div class="button action-button"></div>
+            <div class="button volume-up"></div>
+            <div class="button volume-down"></div>
+            <div class="button side-button"></div>
 
-  <div class="screen">
-    <div class="screen-content">
-      
-      <div class="dynamic-island">
-        <span class="di-text">Dynamic Island</span>
-        <div class="battery">
-          <div class="battery-level"></div>
+            <div class="antenna antenna-top-left"></div>
+            <div class="antenna antenna-top-right"></div>
+            <div class="antenna antenna-bottom-left"></div>
+            <div class="antenna antenna-bottom-right"></div>
+
+            <div class="bezel">
+                
+                <div class="screen">
+                    <div class="wallpaper"></div>
+                    
+                    <div class="dynamic-island">
+                        <div class="camera-lens"></div>
+                        <div class="sensor"></div>
+                    </div>
+
+                    <div class="status-bar">
+                        <div class="time">10:09</div>
+                        <div class="icons">
+                            <div class="signal">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                            <div class="wifi">
+                                <svg viewBox="0 0 24 24" fill="white" width="14px" height="14px"><path d="M12 21L15.6 16.2C14.6 15.4 13.4 15 12 15C10.6 15 9.4 15.4 8.4 16.2L12 21ZM12 11C8.9 11 6.2 12.2 4.1 14.1L6 16.6C7.6 15 9.7 14 12 14C14.3 14 16.4 15 18 16.6L19.9 14.1C17.8 12.2 15.1 11 12 11ZM12 7C7.6 7 3.6 8.7 0.5 11.5L2.4 14C4.9 11.7 8.3 10 12 10C15.7 10 19.1 11.7 21.6 14L23.5 11.5C20.4 8.7 16.4 7 12 7Z"></path></svg>
+                            </div>
+                            <div class="battery">
+                                <div class="battery-level"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notifications">
+                        <div class="notification">
+                            <div class="noti-avatar" style="background-image: url('https://i.pravatar.cc/100?img=5');"></div>
+                            <div class="noti-content">
+                                <div class="noti-head">
+                                    <span class="noti-name">Sarah</span>
+                                    <span class="noti-time">1m ago</span>
+                                </div>
+                                <div class="noti-text">Are you free tonight? 🥂</div>
+                            </div>
+                        </div>
+                        <div class="notification">
+                            <div class="noti-avatar" style="background: #25D366; display: flex; justify-content: center; align-items: center;">💬</div>
+                            <div class="noti-content">
+                                <div class="noti-head">
+                                    <span class="noti-name">Messages</span>
+                                    <span class="noti-time">Now</span>
+                                </div>
+                                <div class="noti-text">You have 3 new messages</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lock-controls">
+                        <div class="lock-btn">🔦</div>
+                        <div class="lock-btn">📷</div>
+                    </div>
+
+                    <div class="home-bar"></div>
+                </div>
+
+                <div class="screen-glass"></div>
+            </div>
         </div>
-      </div>
-
-      <div class="time">10:09</div>
-
-      <div class="notification-area">
-        <div class="notification">
-          <div class="noti-icon avatar-sarah">S</div>
-          <div class="noti-text">
-            <div class="noti-header">Message from Sarah <span class="time-ago">1m ago</span></div>
-            <div class="noti-body">Are you free?</div>
-          </div>
-        </div>
-        <div class="notification">
-          <div class="noti-icon message-icon">💬</div>
-          <div class="noti-text">
-            <div class="noti-header">New Message <span class="time-ago">1m ago</span></div>
-            <div class="noti-body">New Message from Sarah</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <div class="control-icon">&#128294;</div> <div class="control-icon">&#128247;</div> </div>
-      
-      <div class="home-bar"></div>
-
     </div>
-  </div>
-</div>
 
 </body>
 </html>
