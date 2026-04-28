@@ -1,387 +1,428 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mô phỏng iPhone 15 Pro</title>
-    <style>
-        /* Phong cách tổng thể cho trang */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            background: linear-gradient(to bottom, #d9e3f0, #f0f4f9);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #1c1c1e;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô Hình iPhone Động</title>
+<style>
+/* Reset và Bối Cảnh */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
-        /* Container chính chứa điện thoại và các chú thích */
-        .page-container {
-            position: relative;
-            width: 1000px; /* Chiều rộng container tổng thể */
-            height: 1100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f4f7; /* Nền xanh nhạt, sạch */
+  overflow: hidden;
+}
 
-        /* Phần cứng điện thoại */
-        .iphone-frame {
-            position: relative;
-            width: 400px; /* Chiều rộng điện thoại */
-            height: 860px; /* Chiều cao điện thoại */
-            border-radius: 60px;
-            background-color: #f7e6d9; /* Màu titan tự nhiên / vàng hồng nhẹ */
-            box-shadow: 
-                0 0 0 12px #f7e6d9, /* Viền kim loại */
-                0 16px 32px rgba(0,0,0,0.25), /* Bóng đổ */
-                0 6px 12px rgba(0,0,0,0.15);
-            overflow: visible; /* Cần để hiển thị các nút bên ngoài */
-        }
+/* Biến màu */
+:root {
+  --titanium-color: #d1c5b8; /* Màu Titanium Tự Nhiên */
+  --bezel-color: #1a1a1c;
+  --screen-bg-color: #f7e6d9; /* Màu nền cát */
+  --text-color: #1d1d1f;
+  --text-light-color: #86868b;
+  --notification-bg: rgba(255, 255, 255, 0.7);
+  --battery-green: #34c759;
+}
 
-        /* Màn hình và viền đen (bezel) */
-        .screen-frame {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            border-radius: 52px;
-            background-color: #000;
-            overflow: hidden;
-            border: 2px solid #000;
-        }
+/* Mô Hình Điện Thoại Tổng Thể */
+.phone-model {
+  position: relative;
+  width: 420px;
+  height: 870px;
+  border-radius: 60px;
+  background-color: var(--titanium-color);
+  background-image: 
+    linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(to top, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 5px 5px; /* Kết cấu Titanium xước nhẹ */
+  box-shadow: 
+    0 10px 40px rgba(0,0,0,0.15),
+    0 5px 15px rgba(0,0,0,0.1),
+    inset 0 -2px 5px rgba(255,255,255,0.2),
+    inset 0 2px 5px rgba(0,0,0,0.1);
+  overflow: visible; /* Cần để hiển thị các dải anten và nút */
+  transform: perspective(1000px) rotateX(10deg);
+  transition: transform 0.5s ease;
+}
 
-        /* Hình nền màn hình và giao diện người dùng */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f9d9a0; /* Hình nền cát vàng */
-            background-image: 
-                radial-gradient(at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
-                radial-gradient(at 80% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
-            border-radius: 50px; /* Để màn hình mượt mà */
-            position: relative;
-        }
+/* Hiệu ứng xoay khi hover vào mô hình */
+.phone-model:hover {
+  transform: perspective(1000px) rotateX(0deg);
+}
 
-        /* Dynamic Island */
-        .dynamic-island {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 110px;
-            height: 32px;
-            background-color: #000;
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 9px;
-            font-weight: 600;
-            z-index: 10;
-            padding: 0 6px;
-        }
-        .dynamic-island-text {
-            color: #fff;
-            margin-right: auto;
-        }
-        .battery-icon {
-            color: #4cd964; /* Màu xanh lá cây */
-            margin-left: auto;
-            width: 11px;
-            height: 6px;
-            border: 1px solid #fff;
-            border-radius: 1px;
-            position: relative;
-        }
-        .battery-icon::after {
-            content: '';
-            position: absolute;
-            right: -2.5px;
-            top: 1.5px;
-            width: 1.5px;
-            height: 2px;
-            background-color: #fff;
-            border-radius: 0 1px 1px 0;
-        }
+/* Các dải anten */
+.phone-model::before, .phone-model::after {
+  content: '';
+  position: absolute;
+  background-color: #a89f94;
+  height: 3px;
+  width: 60px;
+}
+.phone-model::before { top: 50px; left: 0; border-radius: 0 1.5px 1.5px 0; }
+.phone-model::after { bottom: 50px; right: 0; border-radius: 1.5px 0 0 1.5px; }
 
-        /* Đồng hồ thời gian */
-        .clock {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #fff;
-            font-size: 72px;
-            font-weight: 700;
-            letter-spacing: -2.5px;
-            z-index: 5;
-        }
+/* Các Nút Vật Lý */
+.button {
+  position: absolute;
+  background-color: var(--titanium-color);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    0 2px 4px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
 
-        /* Container thông báo */
-        .notifications {
-            position: absolute;
-            top: 200px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 5;
-        }
+.button:hover {
+  background-color: #dfd4c7;
+  transform: scale(1.03);
+}
 
-        /* Thông báo đơn lẻ */
-        .notification {
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(25px);
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            align-items: start;
-            box-shadow: 0 5px 12px rgba(0,0,0,0.18);
-        }
+.button:active {
+  transform: scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.1);
+}
 
-        .notification-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: #d1d1d6;
-            margin-right: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-        }
+/* Trái: Action Button, Volume Up/Down */
+.left-buttons {
+  position: absolute;
+  top: 150px;
+  left: -12px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.action-button { width: 10px; height: 35px; top: 0px; left: 0px;}
+.volume-up { width: 10px; height: 65px; top: 50px; left: 0px;}
+.volume-down { width: 10px; height: 65px; top: 130px; left: 0px;}
 
-        .notification-content {
-            flex-grow: 1;
-        }
+/* Phải: Side Button */
+.side-button-container {
+    position: absolute;
+    top: 240px;
+    right: -12px;
+}
+.side-button { width: 10px; height: 100px; left: 0px; top: 0px;}
 
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
+/* Nhãn lơ lửng cho các nút */
+.button .label {
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 100;
+}
+.left-buttons .button .label { left: 20px; top: 50%; transform: translateY(-50%); }
+.side-button-container .side-button .label { right: 20px; top: 50%; transform: translateY(-50%); }
 
-        .notification-sender {
-            font-weight: 700;
-            color: #1c1c1e;
-        }
+.button:hover .label {
+  opacity: 1;
+  visibility: visible;
+}
 
-        .notification-time {
-            color: #aeaeb2;
-            font-size: 13px;
-        }
+/* Màn Hình */
+.screen {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border-radius: 50px;
+  background-color: var(--bezel-color);
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+}
 
-        .notification-text {
-            color: #3a3a3c;
-            font-size: 15px;
-        }
+/* Nội dung màn hình khóa chính xác */
+.screen-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--screen-bg-color);
+  background-image: 
+    radial-gradient(at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 60%),
+    radial-gradient(at 90% 80%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+  border-radius: 48px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
 
-        /* Các điều khiển và Thanh điều hướng */
-        .controls {
-            position: absolute;
-            bottom: 50px;
-            left: 40px;
-            right: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #fff;
-            z-index: 5;
-        }
+/* Hình nền lượn sóng động */
+.screen-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 300px;
+  background: 
+    radial-gradient(ellipse at 50% -50%, rgba(230, 200, 160, 0.6) 0%, transparent 80%),
+    radial-gradient(ellipse at 80% 120%, rgba(230, 200, 160, 0.6) 0%, transparent 80%);
+  border-radius: 100% 100% 0 0;
+  transform: translateX(-25%) translateY(100px);
+  animation: wavePulse 8s infinite ease-in-out;
+  z-index: 1;
+}
 
-        .control-icon {
-            font-size: 28px;
-        }
+@keyframes wavePulse {
+  0%, 100% { transform: translateX(-25%) translateY(100px); }
+  50% { transform: translateX(-35%) translateY(80px) scaleY(1.05); }
+}
 
-        .home-bar {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 6px;
-            background-color: #fff;
-            border-radius: 3px;
-            z-index: 10;
-        }
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 32px;
+  background-color: #000;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  z-index: 10;
+  padding: 0 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
+  cursor: pointer;
+}
 
-        /* Nút vật lý bên ngoài */
-        .button {
-            position: absolute;
-            background-color: #f7e6d9; /* Màu titan */
-            border: 1px solid #e0c8b6;
-            box-shadow: 0 1.5px 4px rgba(0,0,0,0.15);
-        }
+.dynamic-island:hover {
+  width: 140px;
+  height: 36px;
+  border-radius: 24px;
+}
 
-        /* Nút trái */
-        .button-action {
-            top: 160px;
-            left: -12px;
-            width: 9px;
-            height: 38px;
-            border-radius: 3.5px 0 0 3.5px;
-        }
+.di-text { margin-right: auto; color: #fff;}
+.battery {
+  position: relative;
+  width: 11px;
+  height: 6px;
+  border: 1px solid #fff;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.battery::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -2.5px;
+  width: 1.5px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 0 1px 1px 0;
+  transform: translateY(-50%);
+}
+.battery-level {
+  width: 80%;
+  height: 100%;
+  background-color: var(--battery-green);
+}
 
-        .button-volume-up {
-            top: 210px;
-            left: -12px;
-            width: 9px;
-            height: 65px;
-            border-radius: 3.5px 0 0 3.5px;
-        }
+/* Đồng hồ Thời Gian */
+.time {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 72px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -2.5px;
+  z-index: 5;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
 
-        .button-volume-down {
-            top: 285px;
-            left: -12px;
-            width: 9px;
-            height: 65px;
-            border-radius: 3.5px 0 0 3.5px;
-        }
+/* Khu vực Thông báo */
+.notification-area {
+  position: absolute;
+  top: 200px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 5;
+}
 
-        /* Nút phải */
-        .button-side {
-            top: 240px;
-            right: -12px;
-            width: 9px;
-            height: 95px;
-            border-radius: 0 3.5px 3.5px 0;
-        }
+.notification {
+  background-color: var(--notification-bg);
+  backdrop-filter: blur(25px);
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.18);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
 
-        /* Phong cách chú thích */
-        .callout {
-            position: absolute;
-            color: #1c1c1e;
-            font-size: 18px;
-            font-weight: 500;
-        }
+.notification:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
 
-        .callout-label {
-            white-space: nowrap;
-        }
+/* Avatar và Biểu tượng */
+.noti-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin-right: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+}
+.avatar-sarah { background-color: #aeaeb2; }
+.message-icon { background-color: #1da1f2; } /* Màu tin nhắn */
 
-        /* Định vị các chú thích chính xác */
-        /* Trái */
-        .callout.action-button { top: 160px; left: 20px; }
-        .callout.volume-up { top: 210px; left: 20px; }
-        .callout.volume-down { top: 285px; left: 20px; }
+/* Nội dung văn bản thông báo */
+.noti-text { flex-grow: 1; }
+.noti-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 2px;
+}
+.time-ago {
+  font-weight: 400;
+  color: var(--text-light-color);
+  font-size: 13px;
+}
+.noti-body {
+  color: #3a3a3c;
+  font-size: 15px;
+}
 
-        /* Phải */
-        .callout.side-button { top: 240px; right: 20px; text-align: right; }
+/* Các Biểu Tượng Dưới Cùng */
+.controls {
+  position: absolute;
+  bottom: 50px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  z-index: 5;
+}
+.control-icon {
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.control-icon:hover { transform: scale(1.1); }
 
-        /* Dưới */
-        .callout.horizontal-bar { top: 820px; left: 50%; transform: translateX(-50%); }
+/* Thanh Ngang/Home Bar (HorBar) mà bạn yêu cầu */
+.home-bar {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 6px;
+  background-color: #fff;
+  border-radius: 3px;
+  z-index: 10;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: grab;
+}
 
-        /* Vẽ đường dẫn chú thích */
-        .callout-line {
-            position: absolute;
-            background-color: #000;
-            height: 1px;
-            pointer-events: none;
-        }
-
-        /* Định vị và xoay các đường dẫn chú thích */
-        /* Trái */
-        .action-button .callout-line { top: 18px; left: 140px; width: 110px; transform: rotate(18deg); }
-        .volume-up .callout-line { top: 32px; left: 110px; width: 140px; transform: rotate(12deg); }
-        .volume-down .callout-line { top: 32px; left: 130px; width: 120px; transform: rotate(8deg); }
-
-        /* Phải */
-        .side-button .callout-line { top: 48px; right: 140px; width: 110px; transform: rotate(-18deg); }
-
-        /* Dưới */
-        .horizontal-bar .callout-line { top: -20px; left: 50%; height: 20px; width: 1px; transform: translateX(-50%); }
-
-    </style>
+/* Hiệu ứng lơ lửng cho Thanh ngang */
+.home-bar:hover {
+  opacity: 0.6;
+  transform: translateX(-50%) translateY(-2px);
+}
+</style>
 </head>
 <body>
 
-    <div class="page-container">
+<div class="phone-model">
+  
+  <div class="left-buttons">
+    <div class="button action-button">
+      <span class="label">Action Button (Mute)</span>
+    </div>
+    <div class="button volume-up">
+      <span class="label">Volume Up</span>
+    </div>
+    <div class="button volume-down">
+      <span class="label">Volume Down</span>
+    </div>
+  </div>
+  
+  <div class="side-button-container">
+    <div class="button side-button">
+      <span class="label">Side Button</span>
+    </div>
+  </div>
 
-        <div class="iphone-frame">
-            
-            <div class="button button-action"></div>
-            <div class="button button-volume-up"></div>
-            <div class="button button-volume-down"></div>
-            <div class="button button-side"></div>
-
-            <div class="screen-frame">
-                <div class="screen">
-                    
-                    <div class="dynamic-island">
-                        <span class="dynamic-island-text">Dynamic Island</span>
-                        <div class="battery-icon"></div>
-                    </div>
-
-                    <div class="clock">10:09</div>
-
-                    <div class="notifications">
-                        <div class="notification">
-                            <div class="notification-avatar">S</div>
-                            <div class="notification-content">
-                                <div class="notification-header">
-                                    <span class="notification-sender">Message from Sarah</span>
-                                    <span class="notification-time">1m ago</span>
-                                </div>
-                                <div class="notification-text">Are you free?</div>
-                            </div>
-                        </div>
-                        <div class="notification">
-                            <div class="notification-avatar">H</div>
-                            <div class="notification-content">
-                                <div class="notification-header">
-                                    <span class="notification-sender">New Message</span>
-                                    <span class="notification-time">1m ago</span>
-                                </div>
-                                <div class="notification-text">New Message from Sarah</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="controls">
-                        <div class="control-icon">&#x1F526;</div> <div class="control-icon">&#x1F4F7;</div> </div>
-
-                    <div class="home-bar"></div>
-
-                </div>
-            </div>
+  <div class="screen">
+    <div class="screen-content">
+      
+      <div class="dynamic-island">
+        <span class="di-text">Dynamic Island</span>
+        <div class="battery">
+          <div class="battery-level"></div>
         </div>
+      </div>
 
-        <div class="callout action-button">
-            <span class="callout-label">Action Button</span>
-            <div class="callout-line"></div>
-        </div>
-        <div class="callout volume-up">
-            <span class="callout-label">Volume Up</span>
-            <div class="callout-line"></div>
-        </div>
-        <div class="callout volume-down">
-            <span class="callout-label">Volume Down</span>
-            <div class="callout-line"></div>
-        </div>
+      <div class="time">10:09</div>
 
-        <div class="callout side-button">
-            <span class="callout-label">Side Button</span>
-            <div class="callout-line"></div>
+      <div class="notification-area">
+        <div class="notification">
+          <div class="noti-icon avatar-sarah">S</div>
+          <div class="noti-text">
+            <div class="noti-header">Message from Sarah <span class="time-ago">1m ago</span></div>
+            <div class="noti-body">Are you free?</div>
+          </div>
         </div>
+        <div class="notification">
+          <div class="noti-icon message-icon">💬</div>
+          <div class="noti-text">
+            <div class="noti-header">New Message <span class="time-ago">1m ago</span></div>
+            <div class="noti-body">New Message from Sarah</div>
+          </div>
+        </div>
+      </div>
 
-        <div class="callout horizontal-bar">
-            <span class="callout-label">Horizontal Bar</span>
-            <div class="callout-line"></div>
-        </div>
+      <div class="controls">
+        <div class="control-icon">&#128294;</div> <div class="control-icon">&#128247;</div> </div>
+      
+      <div class="home-bar"></div>
 
     </div>
+  </div>
+</div>
 
 </body>
 </html>
