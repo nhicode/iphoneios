@@ -3,26 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tool Gợi Ý Nối Từ</title>
+    <title>Liquid Glass Tool Nối Từ</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h2>🔍 Tool Hack Nối Từ</h2>
-        
-        <div class="input-group">
-            <input type="text" id="opponent-word" placeholder="Nhập từ của đối thủ (VD: thời tiết)..." autocomplete="off">
-            <button id="search-btn">Tìm Từ</button>
+    <div id="start-overlay" class="overlay">
+        <div class="overlay-content">
+            <span class="icon">✨</span>
+            <h3>Click anywhere to Start & Paste</h3>
+            <p>Nhấp vào bất cứ đâu để bắt đầu & dán</p>
         </div>
+    </div>
+    
+    <div class="main-wrapper">
+        <div class="app-container">
+            <header>
+                <h2>Tool Nối Từ Liquid Glass</h2>
+                <div class="liquid-dots">
+                    <span class="dot cyan"></span>
+                    <span class="dot white"></span>
+                    <span class="dot cyan"></span>
+                </div>
+            </header>
+            
+            <section class="input-section">
+                <input type="text" id="opponent-word" placeholder="Tự động dán hoặc nhập từ đối thủ..." autocomplete="off">
+            </section>
 
-        <div class="results-header">
-            <span>Kết quả gợi ý:</span>
-            <span id="result-count">0 từ</span>
+            <section class="results-section">
+                <div class="results-header">
+                    <span id="result-status">Kho dữ liệu: 0 từ</span>
+                    <span id="result-count">0 từ gợi ý</span>
+                </div>
+                
+                <ul id="results-list" class="results-list">
+                    <li class="empty-msg">Chưa có dữ liệu.</li>
+                </ul>
+            </section>
         </div>
-        
-        <ul id="results-list" class="results-list">
-            <li class="empty-msg">Chưa có dữ liệu. Hãy nhập từ để tìm!</li>
-        </ul>
     </div>
 
     <script src="script.js"></script>
