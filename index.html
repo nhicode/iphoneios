@@ -3,33 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tool Nối Từ - Liquid Glass</title>
+    <title>Tool Nối Từ - Tự Động</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Nền thủy tinh lỏng (đã giảm số lượng & tối ưu) -->
     <div class="bg-orb"></div>
     <div class="bg-orb"></div>
 
-    <div class="container" id="main-container">
-        <h2><span class="emoji">💧</span> Tool Nối Từ <span class="emoji">🔮</span></h2>
-
-        <div class="input-group">
-            <input type="text" id="opponent-word" placeholder="Nhập từ của đối thủ..." autocomplete="off">
-            <button class="btn btn-accent" id="search-btn">🔍 Tìm</button>
-            <button class="btn" id="paste-btn">📋 Dán</button>
-        </div>
-
+    <div class="container">
+        <h2><span>💧</span> Nối Từ Tự Động <span>🔮</span></h2>
+        <input type="text" id="wordInput" placeholder="Đợi tự động dán hoặc nhập từ..." autocomplete="off" autofocus>
         <div class="results-header">
-            <span>✨ Kết quả gợi ý</span>
-            <span id="result-count">0 từ</span>
+            <span>✨ Kết quả</span>
+            <span id="resultCount">0 từ</span>
         </div>
-
-        <ul id="results-list" class="results-list">
-            <li class="empty-msg">Đang tải dữ liệu từ điển...</li>
+        <ul id="resultsList" class="results-list">
+            <li class="empty-msg">Đang tải từ điển...</li>
         </ul>
     </div>
 
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
