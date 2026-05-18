@@ -3,9 +3,7 @@
     const DICT_URL = "https://cdn.jsdelivr.net/gh/winstonleedev/tudien/tudien.txt";
     let dictionary = [];
     let isReady = false;
-    let autoPasteDone = false; // chỉ tự động dán 1 lần
 
-    // DOM
     const input = document.getElementById("wordInput");
     const resultCount = document.getElementById("resultCount");
     const resultsList = document.getElementById("resultsList");
@@ -106,28 +104,29 @@
         }, 900);
     }
 
-    // ========== Tự động dán clipboard (cần user gesture) ==========
+    // ========== Tự động dán clipboard (không cần permissions) ==========
     async function attemptAutoPaste() {
         if (!isReady) return;
-        if (autoPasteDone && input.value.trim()) return; // đã dán rồi, không làm lại nếu có từ
+        // Nếu đã có từ rồi thì không dán đè
+        if (input.value.trim()) return;
+
         try {
             const text = await navigator.clipboard.readText();
             if (text && text.trim()) {
                 input.value = text.trim();
-                autoPasteDone = true;
                 findAndDisplay();
             } else {
-                // Nếu clipboard trống, chỉ đặt placeholder
                 input.placeholder = "Nhập từ của đối thủ...";
             }
         } catch (err) {
-            // Không có quyền hoặc lỗi – hiển thị hướng dẫn
-            console.log("Auto-paste cần quyền:", err.message);
+            // Không đọc được clipboard – có thể do thiếu user gesture hoặc chưa cấp quyền
+            // Đặt placeholder gợi ý người dùng tự paste
             input.placeholder = "Dán thủ công (Ctrl+V) hoặc gõ từ...";
+            console.log("Auto-paste không khả dụng (cần user gesture):", err.message);
         }
     }
 
-    // ========== Ripple effect khi chạm vào container ==========
+    // ========== Ripple khi chạm vào container ==========
     function createRipple(e) {
         const ripple = document.createElement("span");
         ripple.className = "ripple";
@@ -140,34 +139,30 @@
         ripple.addEventListener('animationend', () => ripple.remove());
     }
 
-    // ========== Sự kiện ==========
-    // Lắng nghe click toàn bộ document để kích hoạt auto-paste
-    document.addEventListener('click', function firstClickHandler(e) {
-        // Chỉ gọi auto-paste nếu chưa có từ và sẵn sàng
+    // ========== Sự kiện người dùng ==========
+    // Lắng nghe click toàn trang để đọc clipboard (đảm bảo user gesture)
+    document.addEventListener('click', function clipboardHandler(e) {
         if (isReady && !input.value.trim()) {
             attemptAutoPaste();
         }
-        // Tạo ripple nếu click trong container
         if (container.contains(e.target)) {
             createRipple(e);
         }
-        // Không xoá handler vì ta vẫn muốn tự động dán khi input trống (có thể xoá sau)
-        // Nhưng để tránh gọi liên tục, kiểm tra input trống.
     });
 
-    // Khi focus vào input (do click), cũng thử auto-paste nếu trống
+    // Khi focus vào input cũng thử auto-paste (nếu input trống)
     input.addEventListener('focus', () => {
         if (isReady && !input.value.trim()) {
             attemptAutoPaste();
         }
     });
 
-    // Khi paste thủ công
+    // Paste thủ công (Ctrl+V) -> tìm ngay
     input.addEventListener('paste', () => {
         setTimeout(findAndDisplay, 10);
     });
 
-    // Khi gõ
+    // Gõ tay -> debounce tìm
     input.addEventListener('input', onInput);
 
     // Khởi động
