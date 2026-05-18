@@ -1,6 +1,6 @@
 let dictionary = [];
 // Sử dụng proxy để chống lỗi chặn CORS trên trình duyệt
-const dictionaryUrl = "https://api.allorigins.win/raw?url=https://raw.githubusercontent.com/vntk/dictionary/master/words.txt";
+const dictionaryUrl = "https://api.allorigins.win/raw?url=https://raw.githubusercontent.com/winstonleedev/tudien/master/tudien.txt";
 
 const inputField = document.getElementById("opponent-word");
 const searchBtn = document.getElementById("search-btn");
