@@ -1,5 +1,5 @@
 (function() {
-    // URL CDN jsDelivr cho từ điển Viet74K.txt
+    // URL từ điển Viet74K qua CDN jsDelivr
     const DICT_URL = "https://cdn.jsdelivr.net/gh/duyet/vietnamese-wordlist@master/Viet74K.txt";
     let dictionary = [];
     let isReady = false;
@@ -19,7 +19,7 @@
             if (!resp.ok) throw new Error("Lỗi mạng");
             const text = await resp.text();
             
-            // Tách từ theo dòng mới (file mỗi từ một dòng)
+            // Tách từ theo dòng, chuyển về chữ thường, bỏ ký tự đặc biệt nếu cần
             dictionary = text.split("\n")
                 .map(w => w.trim().toLowerCase())
                 .filter(w => w.length > 0);
@@ -33,7 +33,7 @@
         }
     }
 
-    // ========== Tìm từ nối ==========
+    // ========== Tìm từ nối (chỉ lấy từ có 2 tiếng) ==========
     function findAndDisplay() {
         if (!isReady) return;
         const raw = input.value.trim().toLowerCase();
@@ -44,19 +44,23 @@
         }
 
         const lastWord = raw.split(/\s+/).pop();
-        // Tìm tất cả từ bắt đầu bằng từ cuối (nối từ)
-        const matches = dictionary.filter(w => w.startsWith(lastWord));
+        
+        // Lọc: bắt đầu bằng lastWord VÀ có đúng 2 tiếng (tức có 1 khoảng trắng)
+        let matches = dictionary.filter(w => {
+            return w.startsWith(lastWord) && w.split(/\s+/).length === 2;
+        });
 
+        // Giới hạn hiển thị 200 từ để tránh lag
+        const displayWords = matches.slice(0, 200);
         const fragment = document.createDocumentFragment();
-        resultCount.textContent = `🔍 ${matches.length.toLocaleString()} từ`;
-        if (matches.length === 0) {
+        resultCount.textContent = `🔍 ${matches.length.toLocaleString()} từ (2 tiếng)`;
+
+        if (displayWords.length === 0) {
             const li = document.createElement("li");
             li.className = "empty-msg";
-            li.textContent = "😔 Không tìm thấy từ nối";
+            li.textContent = "😔 Không tìm thấy từ 2 tiếng nào";
             fragment.appendChild(li);
         } else {
-            // Giới hạn hiển thị tối đa 200 từ để tránh lag
-            const displayWords = matches.slice(0, 200);
             displayWords.forEach((word, idx) => {
                 const li = document.createElement("li");
                 li.textContent = word;
