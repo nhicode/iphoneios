@@ -1,188 +1,151 @@
 (function() {
-    // ========== URL từ điển nhanh (jsDelivr CDN) ==========
-    const dictionaryUrl = "https://cdn.jsdelivr.net/gh/winstonleedev/tudien/tudien.txt";
+    // URL từ điển siêu nhanh (CDN)
+    const DICT_URL = "https://cdn.jsdelivr.net/gh/winstonleedev/tudien/tudien.txt";
     let dictionary = [];
+    let isDictionaryReady = false;
 
-    // DOM elements
-    const inputField = document.getElementById("opponent-word");
-    const searchBtn = document.getElementById("search-btn");
-    const pasteBtn = document.getElementById("paste-btn");
-    const resultsList = document.getElementById("results-list");
-    const resultCount = document.getElementById("result-count");
-    const container = document.getElementById("main-container");
+    // DOM
+    const input = document.getElementById("wordInput");
+    const resultCount = document.getElementById("resultCount");
+    const resultsList = document.getElementById("resultsList");
 
-    // ========== Tối ưu render với DocumentFragment ==========
-    function renderResults(wordsArray) {
-        // Xóa nội dung cũ
-        resultsList.innerHTML = "";
-        resultCount.textContent = `🔍 ${wordsArray.length} từ`;
-
-        if (wordsArray.length === 0) {
-            const li = document.createElement("li");
-            li.className = "empty-msg";
-            li.textContent = "😔 Không tìm thấy từ nào để nối.";
-            resultsList.appendChild(li);
-            return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        wordsArray.forEach((word, index) => {
-            const li = document.createElement("li");
-            li.textContent = word;
-            // Xuất hiện tuần tự mượt
-            li.style.opacity = '0';
-            li.style.transform = 'translateX(15px)';
-            li.style.transition = `opacity 0.25s ease, transform 0.25s ease`;
-            li.style.transitionDelay = `${index * 0.02}s`;
-
-            // Click để copy
-            li.addEventListener("click", function(e) {
-                e.stopPropagation();
-                handleCopy(word, this);
-            });
-
-            fragment.appendChild(li);
-        });
-
-        resultsList.appendChild(fragment);
-
-        // Kích hoạt animation sau khi đã thêm vào DOM
-        requestAnimationFrame(() => {
-            const items = resultsList.querySelectorAll('li:not(.empty-msg)');
-            items.forEach(li => {
-                li.style.opacity = '1';
-                li.style.transform = 'translateX(0)';
-            });
-        });
-    }
-
-    // ========== Copy từ với fallback ==========
-    function handleCopy(word, element) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(word).then(() => {
-                showCopyFeedback(element);
-            }).catch(() => {
-                fallbackCopy(word, element);
-            });
-        } else {
-            fallbackCopy(word, element);
-        }
-    }
-
-    function fallbackCopy(word, element) {
-        const textarea = document.createElement('textarea');
-        textarea.value = word;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        document.body.removeChild(textarea);
-        showCopyFeedback(element);
-    }
-
-    function showCopyFeedback(element) {
-        const originalText = element.textContent;
-        element.textContent = "✅ Đã copy!";
-        element.classList.add("copied-flash");
-        setTimeout(() => {
-            element.textContent = originalText;
-            element.classList.remove("copied-flash");
-        }, 900);
-    }
-
-    // ========== Ripple effect (tối ưu) ==========
-    function createRipple(e, el) {
-        const ripple = document.createElement("span");
-        ripple.className = "ripple-effect";
-        const rect = el.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        ripple.style.width = ripple.style.height = `${size}px`;
-        ripple.style.left = `${e.clientX - rect.left - size/2}px`;
-        ripple.style.top = `${e.clientY - rect.top - size/2}px`;
-        el.appendChild(ripple);
-        ripple.addEventListener('animationend', () => ripple.remove());
-    }
-
-    // Gắn ripple cho các nút
-    [searchBtn, pasteBtn].forEach(btn => {
-        btn.addEventListener('click', (e) => createRipple(e, btn));
-    });
-
-    // ========== Tải từ điển nhanh ==========
+    // ========== Tải từ điển ==========
     async function fetchDictionary() {
-        resultCount.textContent = "Đang tải...";
+        resultCount.textContent = "⏳ Đang tải...";
         resultsList.innerHTML = '<li class="empty-msg">🔄 Đang tải dữ liệu...</li>';
         try {
-            const response = await fetch(dictionaryUrl);
-            if (!response.ok) throw new Error("Lỗi kết nối");
-            const text = await response.text();
+            const resp = await fetch(DICT_URL);
+            if (!resp.ok) throw new Error("Lỗi mạng");
+            const text = await resp.text();
             dictionary = text.split("\n")
                 .map(w => w.trim().toLowerCase().replace(/_/g, " "))
                 .filter(w => w.split(/\s+/).length === 2);
+            isDictionaryReady = true;
             resultCount.textContent = `📚 ${dictionary.length} từ`;
-            resultsList.innerHTML = '<li class="empty-msg">✅ Sẵn sàng! Nhập từ để tìm.</li>';
-        } catch (err) {
+            resultsList.innerHTML = '<li class="empty-msg">✅ Sẵn sàng – nhập hoặc dán từ.</li>';
+            
+            // Sau khi tải xong, thử auto‑paste từ clipboard
+            attemptAutoPaste();
+        } catch (e) {
             resultCount.textContent = "⚠️ Lỗi";
-            resultsList.innerHTML = `<li class="empty-msg" style="color:#ff6b6b;">⚠️ ${err.message}</li>`;
+            resultsList.innerHTML = `<li class="empty-msg" style="color:#ff6b6b;">⚠️ ${e.message}</li>`;
         }
     }
 
     // ========== Tìm từ nối ==========
-    function findNextWords() {
-        if (!dictionary.length) {
-            alert("⏳ Dữ liệu chưa sẵn sàng!");
+    function findAndDisplay() {
+        if (!isDictionaryReady) return;
+        const raw = input.value.trim().toLowerCase();
+        if (!raw) {
+            resultCount.textContent = "0 từ";
+            resultsList.innerHTML = '<li class="empty-msg">🔍 Nhập từ để tìm...</li>';
             return;
         }
-        const word = inputField.value.trim().toLowerCase();
-        if (!word) {
-            inputField.style.animation = 'shake 0.4s';
-            setTimeout(() => inputField.style.animation = '', 400);
-            return;
-        }
-        const lastSyllable = word.split(/\s+/).pop();
-        const prefix = lastSyllable + " ";
+
+        const lastWord = raw.split(/\s+/).pop();
+        const prefix = lastWord + " ";
         const matches = dictionary.filter(w => w.startsWith(prefix));
-        renderResults(matches);
+
+        // Render với DocumentFragment
+        const fragment = document.createDocumentFragment();
+        resultCount.textContent = `🔍 ${matches.length} từ`;
+        if (matches.length === 0) {
+            const li = document.createElement("li");
+            li.className = "empty-msg";
+            li.textContent = "😔 Không tìm thấy từ nối";
+            fragment.appendChild(li);
+        } else {
+            matches.forEach((word, idx) => {
+                const li = document.createElement("li");
+                li.textContent = word;
+                li.style.opacity = '0';
+                li.style.transform = 'translateY(8px)';
+                li.style.transition = `0.25s ease ${idx * 0.02}s`;
+                li.addEventListener("click", () => copyWord(word, li));
+                fragment.appendChild(li);
+            });
+        }
+
+        resultsList.innerHTML = "";
+        resultsList.appendChild(fragment);
+
+        // Kích hoạt animation
+        requestAnimationFrame(() => {
+            resultsList.querySelectorAll("li:not(.empty-msg)").forEach(li => {
+                li.style.opacity = '1';
+                li.style.transform = 'translateY(0)';
+            });
+        });
     }
 
-    // ========== Auto paste & search ==========
-    async function autoPasteAndSearch() {
-        if (!dictionary.length) {
-            alert("⏳ Đợi dữ liệu tải xong nhé!");
-            return;
-        }
+    // ========== Debounce tìm kiếm khi gõ tay ==========
+    let debounceTimer;
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(findAndDisplay, 300);
+    }
+
+    // ========== Copy từ ==========
+    async function copyWord(word, element) {
         try {
+            await navigator.clipboard.writeText(word);
+        } catch {
+            const ta = document.createElement("textarea");
+            ta.value = word;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+        }
+        // Hiệu ứng flash
+        const original = element.textContent;
+        element.textContent = "✅ Đã copy!";
+        element.classList.add("copied-flash");
+        setTimeout(() => {
+            element.textContent = original;
+            element.classList.remove("copied-flash");
+        }, 900);
+    }
+
+    // ========== Tự động dán clipboard (khi load hoặc khi có text) ==========
+    async function attemptAutoPaste() {
+        if (!isDictionaryReady) return;
+        try {
+            // Yêu cầu quyền đọc clipboard (có thể bị từ chối nếu không HTTPS/localhost)
+            const permission = await navigator.permissions.query({ name: "clipboard-read" });
+            if (permission.state === "denied") {
+                console.log("Quyền clipboard bị từ chối, người dùng tự paste.");
+                return;
+            }
             const text = await navigator.clipboard.readText();
             if (text && text.trim()) {
-                inputField.value = text.trim();
-                findNextWords();
-            } else {
-                alert("📋 Clipboard trống!");
+                input.value = text.trim();
+                // Kích hoạt tìm kiếm ngay (không debounce)
+                findAndDisplay();
             }
-        } catch (e) {
-            alert("🔒 Không đọc được clipboard. Vui lòng dán thủ công (Ctrl+V).");
-            inputField.focus();
+        } catch (err) {
+            // Không có quyền hoặc lỗi – yên lặng, người dùng có thể paste thủ công
+            console.log("Auto‑paste không khả dụng:", err.message);
         }
     }
 
-    // ========== Events ==========
-    searchBtn.addEventListener('click', findNextWords);
-    pasteBtn.addEventListener('click', autoPasteAndSearch);
-
-    inputField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') findNextWords();
+    // ========== Sự kiện ==========
+    // Khi người dùng paste thủ công (Ctrl+V hoặc chuột phải)
+    input.addEventListener("paste", (e) => {
+        // Đợi một chút để giá trị input cập nhật
+        setTimeout(findAndDisplay, 10);
     });
 
-    // Phím tắt Ctrl+Shift+V để auto dán & tìm
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && e.key === 'V') {
-            e.preventDefault();
-            autoPasteAndSearch();
+    // Khi người dùng gõ phím (debounce)
+    input.addEventListener("input", debounceSearch);
+
+    // Nếu người dùng focus vào input, thử auto‑paste lại (phòng trường hợp chưa có quyền lúc đầu)
+    input.addEventListener("focus", () => {
+        if (!input.value.trim() && isDictionaryReady) {
+            attemptAutoPaste();
         }
     });
 
     // Khởi động
     fetchDictionary();
-    setTimeout(() => inputField.focus(), 400);
 })();
