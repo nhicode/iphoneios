@@ -1,9 +1,9 @@
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.06);
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --glass-blur: blur(18px) saturate(150%);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.22);
+    --glass-blur: blur(24px) saturate(200%);
     --accent: #4CAF50;
-    --bg: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
 }
 
 * {
@@ -14,104 +14,143 @@
 }
 
 body {
-    font-family: -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif;
-    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-gradient);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
     user-select: none;
+    -webkit-user-select: none;
+    position: relative;
 }
 
-/* Background orbs (tối ưu) */
+/* Background orbs – chuyển động mượt */
 .bg-orb {
     position: fixed;
     border-radius: 50%;
-    filter: blur(70px);
-    opacity: 0.25;
+    filter: blur(80px);
+    opacity: 0.3;
     pointer-events: none;
-    animation: float 14s infinite alternate ease-in-out;
+    animation: orbFloat 14s infinite alternate ease-in-out;
 }
-.bg-orb:nth-child(1) {
-    width: 350px; height: 350px;
-    background: radial-gradient(circle, rgba(120,80,255,0.4), transparent);
-    top: -100px; left: -100px;
+.orb-1 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle at 30% 30%, rgba(130, 80, 255, 0.6), transparent);
+    top: -120px; left: -90px;
 }
-.bg-orb:nth-child(2) {
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,200,255,0.35), transparent);
-    bottom: -80px; right: -80px;
+.orb-2 {
+    width: 320px; height: 320px;
+    background: radial-gradient(circle at 70% 70%, rgba(0, 210, 255, 0.5), transparent);
+    bottom: -100px; right: -70px;
     animation-delay: -5s;
 }
-
-@keyframes float {
-    0% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(25px,-20px) scale(1.06); }
-    100% { transform: translate(-15px,25px) scale(0.94); }
+.orb-3 {
+    width: 250px; height: 250px;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 100, 180, 0.4), transparent);
+    top: 60%; left: 70%;
+    animation-delay: -3s;
 }
 
-/* Container chính - glass morphism */
-.container {
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -25px) scale(1.08); }
+    100% { transform: translate(-15px, 35px) scale(0.92); }
+}
+
+/* Container chính – Liquid Glass chuyên nghiệp */
+.glass-container {
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    height: 85vh;
+    max-height: 680px;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
-    border-radius: 34px;
-    padding: 26px 22px;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07);
+    border-radius: 36px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    padding: 28px 22px;
     display: flex;
     flex-direction: column;
-    height: 85vh;
-    max-height: 650px;
-    contain: content;
+    overflow: hidden;
 }
 
-h2 {
-    color: #fff;
+/* Lớp highlight bóng sáng trên kính */
+.glass-highlight {
+    position: absolute;
+    top: -30%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+/* Tiêu đề */
+.title {
+    color: #ffffff;
     font-weight: 600;
     font-size: 22px;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
 }
-h2 span {
+.icon {
     display: inline-block;
-    animation: bounce 2s infinite;
+    animation: iconBounce 2.2s infinite;
 }
-@keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
 }
 
-/* Input field */
+/* Input wrapper – tạo khung glass riêng */
+.input-wrapper {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 18px;
+}
+
 #wordInput {
-    padding: 16px 18px;
-    border: 1px solid rgba(255,255,255,0.2);
+    width: 100%;
+    padding: 16px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 22px;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: #fff;
     font-size: 17px;
     outline: none;
-    margin-bottom: 14px;
     caret-color: var(--accent);
-    transition: 0.2s;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-}
-#wordInput:focus {
-    border-color: rgba(255,255,255,0.45);
-    background: rgba(255,255,255,0.1);
+    box-shadow: 
+        inset 0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: all 0.25s ease;
 }
 #wordInput::placeholder {
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.5);
     font-weight: 300;
+}
+#wordInput:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        inset 0 2px 6px rgba(0,0,0,0.3),
+        0 0 25px rgba(255, 255, 255, 0.1);
 }
 
 /* Results header */
@@ -119,67 +158,98 @@ h2 span {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    color: rgba(255,255,255,0.7);
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.75);
     font-size: 13px;
+    font-weight: 500;
     padding: 0 4px;
+    position: relative;
+    z-index: 1;
 }
 #resultCount {
-    background: rgba(255,255,255,0.1);
-    padding: 2px 12px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 3px 12px;
+    border-radius: 14px;
     font-weight: 600;
     color: #fff;
-    backdrop-filter: blur(4px);
+    font-size: 12px;
 }
 
-/* Results list */
+/* Danh sách kết quả */
 .results-list {
     list-style: none;
     flex: 1;
     overflow-y: auto;
-    background: rgba(255,255,255,0.025);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 22px;
     padding: 6px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
+    position: relative;
+    z-index: 1;
 }
 .results-list li {
-    padding: 13px 15px;
-    border-radius: 15px;
+    padding: 14px 16px;
+    border-radius: 16px;
     font-size: 16px;
     color: #fff;
-    cursor: pointer;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid transparent;
-    transition: 0.2s;
     font-weight: 500;
-    backdrop-filter: blur(3px);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+    transition: 0.2s ease;
+    backdrop-filter: blur(4px);
 }
 .results-list li:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateX(2px);
 }
 .results-list li:active {
     transform: scale(0.97);
-    background: rgba(76,175,80,0.25);
+    background: rgba(76, 175, 80, 0.25);
+    border-color: rgba(76, 175, 80, 0.5);
 }
 .empty-msg {
-    color: rgba(255,255,255,0.45) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     pointer-events: none !important;
     background: transparent !important;
     border: none !important;
 }
+
+/* Hiệu ứng copy flash */
 .copied-flash {
-    animation: flash 0.8s ease;
+    animation: copyFlash 0.9s ease-out;
 }
-@keyframes flash {
-    0% { background: rgba(76,175,80,0.4); box-shadow: 0 0 20px rgba(76,175,80,0.5); }
+@keyframes copyFlash {
+    0% { background: rgba(76, 175, 80, 0.4); box-shadow: 0 0 20px rgba(76,175,80,0.6); }
     100% { background: transparent; box-shadow: none; }
 }
 
+/* Ripple effect khi chạm */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+    transform: scale(0);
+    animation: rippleAnim 0.7s ease-out forwards;
+    pointer-events: none;
+    z-index: 999;
+}
+@keyframes rippleAnim {
+    to { transform: scale(4); opacity: 0; }
+}
+
+/* Responsive */
 @media (max-width: 400px) {
-    .container { padding: 20px 16px; }
+    .glass-container {
+        padding: 22px 16px;
+        border-radius: 30px;
+    }
 }
