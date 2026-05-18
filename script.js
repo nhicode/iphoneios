@@ -1,5 +1,5 @@
 let dictionary = [];
-// Sử dụng proxy để chống lỗi chặn CORS trên trình duyệt
+// Sử dụng proxy để chống lỗi chặn CORS và link Github chứa từ điển chuẩn
 const dictionaryUrl = "https://api.allorigins.win/raw?url=https://raw.githubusercontent.com/winstonleedev/tudien/master/tudien.txt";
 
 const inputField = document.getElementById("opponent-word");
@@ -17,9 +17,9 @@ async function fetchDictionary() {
         
         const textData = await response.text();
         
-        // Tách văn bản thành các dòng, bỏ khoảng trắng thừa và LỌC LẤY TỪ CÓ 2 TIẾNG
+        // Tách dòng, đổi dấu gạch dưới (nếu có) thành dấu cách, và LỌC lấy từ có đúng 2 tiếng
         dictionary = textData.split("\n")
-            .map(word => word.trim().toLowerCase())
+            .map(word => word.trim().toLowerCase().replace(/_/g, " "))
             .filter(word => word.split(/\s+/).length === 2);
             
         resultCount.textContent = `Kho dữ liệu: ${dictionary.length} từ`;
