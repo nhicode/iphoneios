@@ -3,46 +3,639 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liquid Glass Tool Nối Từ</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Tool Nối Từ - Liquid Glass iOS</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-blur: blur(20px) saturate(180%);
+            --accent: #4CAF50;
+            --accent-glow: rgba(76, 175, 80, 0.6);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Nền động với các bong bóng thủy tinh lỏng */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+            animation: float 12s infinite ease-in-out alternate;
+        }
+        .bg-orb:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(120, 80, 255, 0.5), transparent);
+            top: -100px;
+            left: -100px;
+            animation-duration: 14s;
+        }
+        .bg-orb:nth-child(2) {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.4), transparent);
+            bottom: -120px;
+            right: -80px;
+            animation-duration: 10s;
+            animation-delay: -4s;
+        }
+        .bg-orb:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255, 100, 200, 0.35), transparent);
+            top: 50%;
+            left: 60%;
+            animation-duration: 16s;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(40px, -30px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+            100% {
+                transform: translate(10px, 40px) scale(1.05);
+            }
+        }
+
+        /* Container chính - Glass Morphism */
+        .container {
+            position: relative;
+            z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            max-height: 700px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            animation: containerAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform;
+        }
+
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Tiêu đề */
+        h2 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 22px;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        h2 span.emoji {
+            font-size: 26px;
+            display: inline-block;
+            animation: bounceEmoji 2s infinite;
+        }
+        @keyframes bounceEmoji {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Nhóm input - glass style */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        #opponent-word {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.2px;
+            caret-color: var(--accent);
+        }
+        #opponent-word::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+            font-weight: 300;
+        }
+        #opponent-word:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.08), inset 0 1px 4px rgba(0, 0, 0, 0.1);
+            transform: scale(1.02);
+        }
+
+        /* Nút bấm - Liquid Glass */
+        .btn {
+            padding: 14px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn:active {
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s ease;
+        }
+        .btn-accent {
+            background: rgba(76, 175, 80, 0.25);
+            border-color: rgba(76, 175, 80, 0.5);
+            color: #fff;
+            font-weight: 700;
+        }
+        .btn-accent:active {
+            background: rgba(76, 175, 80, 0.5);
+        }
+
+        /* Hiệu ứng chất lỏng (liquid ripple) khi click */
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 70%);
+            transform: scale(0);
+            animation: liquidRipple 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(1px);
+        }
+        @keyframes liquidRipple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Khu vực kết quả */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding: 0 4px;
+        }
+        #result-count {
+            font-weight: 600;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .results-list {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .results-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .results-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .results-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .results-list li {
+            padding: 13px 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            color: #fff;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid transparent;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            letter-spacing: 0.1px;
+            font-weight: 500;
+        }
+        .results-list li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .results-list li:active {
+            transform: scale(0.97);
+            background: rgba(76, 175, 80, 0.3);
+            border-color: var(--accent-glow);
+            transition: all 0.08s ease;
+        }
+        .results-list li.empty-msg {
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            pointer-events: none;
+            background: transparent;
+            border: none;
+            font-weight: 400;
+        }
+
+        /* Hiệu ứng shine khi copy */
+        @keyframes copyFlash {
+            0% {
+                background: rgba(76, 175, 80, 0.4);
+                border-color: rgba(255, 255, 255, 0.7);
+                box-shadow: 0 0 25px rgba(76, 175, 80, 0.8);
+            }
+            100% {
+                background: rgba(255, 255, 255, 0.04);
+                border-color: transparent;
+                box-shadow: none;
+            }
+        }
+        .copied-flash {
+            animation: copyFlash 1s ease-out forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .container {
+                padding: 20px 16px;
+                border-radius: 28px;
+                height: 90vh;
+            }
+            #opponent-word {
+                padding: 12px 14px;
+                font-size: 15px;
+            }
+            .btn {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="start-overlay" class="overlay">
-        <div class="overlay-content">
-            <span class="icon">✨</span>
-            <h3>Click anywhere to Start & Paste</h3>
-            <p>Nhấp vào bất cứ đâu để bắt đầu & dán</p>
-        </div>
-    </div>
-    
-    <div class="main-wrapper">
-        <div class="app-container">
-            <header>
-                <h2>Tool Nối Từ Liquid Glass</h2>
-                <div class="liquid-dots">
-                    <span class="dot cyan"></span>
-                    <span class="dot white"></span>
-                    <span class="dot cyan"></span>
-                </div>
-            </header>
-            
-            <section class="input-section">
-                <input type="text" id="opponent-word" placeholder="Tự động dán hoặc nhập từ đối thủ..." autocomplete="off">
-            </section>
+    <!-- Các quả cầu nền thủy tinh lỏng -->
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
 
-            <section class="results-section">
-                <div class="results-header">
-                    <span id="result-status">Kho dữ liệu: 0 từ</span>
-                    <span id="result-count">0 từ gợi ý</span>
-                </div>
-                
-                <ul id="results-list" class="results-list">
-                    <li class="empty-msg">Chưa có dữ liệu.</li>
-                </ul>
-            </section>
+    <div class="container" id="main-container">
+        <h2><span class="emoji">💧</span> Tool Nối Từ <span class="emoji">🔮</span></h2>
+
+        <div class="input-group">
+            <input type="text" id="opponent-word" placeholder="Nhập từ của đối thủ..." autocomplete="off">
+            <button class="btn btn-accent" id="search-btn">🔍 Tìm</button>
+            <button class="btn" id="paste-btn">📋 Dán</button>
         </div>
+
+        <div class="results-header">
+            <span>✨ Kết quả gợi ý</span>
+            <span id="result-count">0 từ</span>
+        </div>
+
+        <ul id="results-list" class="results-list">
+            <li class="empty-msg">Đang tải dữ liệu từ điển...</li>
+        </ul>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        (function() {
+            // ============ DỮ LIỆU TỪ ĐIỂN ============
+            let dictionary = [];
+            const dictionaryUrl =
+                "https://api.allorigins.win/raw?url=https://raw.githubusercontent.com/winstonleedev/tudien/master/tudien.txt";
+
+            const inputField = document.getElementById("opponent-word");
+            const searchBtn = document.getElementById("search-btn");
+            const pasteBtn = document.getElementById("paste-btn");
+            const resultsList = document.getElementById("results-list");
+            const resultCount = document.getElementById("result-count");
+            const container = document.getElementById("main-container");
+
+            // ============ HÀM TẠO HIỆU ỨNG CHẤT LỎNG (LIQUID RIPPLE) ============
+            function createLiquidRipple(e, element) {
+                const ripple = document.createElement("span");
+                ripple.classList.add("ripple-effect");
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+                ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+                element.style.position = element.style.position || 'relative';
+                element.style.overflow = 'hidden';
+                element.appendChild(ripple);
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                });
+            }
+
+            // Gắn hiệu ứng ripple cho tất cả nút và container
+            [searchBtn, pasteBtn].forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    createLiquidRipple(e, this);
+                });
+            });
+            // Container cũng có ripple khi click vào vùng trống (tạo cảm giác sống động)
+            container.addEventListener('click', function(e) {
+                if (e.target === container || e.target.classList.contains('results-list') || e.target
+                    .classList.contains('results-header')) {
+                    createLiquidRipple(e, container);
+                }
+            });
+
+            // ============ HÀM TẢI DỮ LIỆU TỪ ĐIỂN ============
+            async function fetchDictionary() {
+                resultCount.textContent = "Đang tải...";
+                resultsList.innerHTML = '<li class="empty-msg">🔄 Đang tải dữ liệu từ điển...</li>';
+
+                try {
+                    const response = await fetch(dictionaryUrl);
+                    if (!response.ok) throw new Error("Không thể kết nối đến nguồn dữ liệu");
+
+                    const textData = await response.text();
+                    dictionary = textData.split("\n")
+                        .map(word => word.trim().toLowerCase().replace(/_/g, " "))
+                        .filter(word => word.split(/\s+/).length === 2);
+
+                    resultCount.textContent = `📚 ${dictionary.length} từ`;
+                    resultsList.innerHTML =
+                        '<li class="empty-msg">✅ Sẵn sàng! Nhập từ và tìm kiếm.</li>';
+                } catch (error) {
+                    resultCount.textContent = "⚠️ Lỗi";
+                    resultsList.innerHTML =
+                        `<li class="empty-msg" style="color:#ff6b6b;">⚠️ ${error.message}</li>`;
+                }
+            }
+
+            // Gọi tải ngay lập tức
+            fetchDictionary();
+
+            // ============ CHỨC NĂNG TỰ ĐỘNG DÁN (AUTO PASTE) ============
+            async function autoPasteAndSearch() {
+                if (dictionary.length === 0) {
+                    alert("⏳ Kho dữ liệu chưa sẵn sàng, vui lòng đợi giây lát!");
+                    return;
+                }
+                try {
+                    // Thử đọc clipboard
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.trim()) {
+                        inputField.value = text.trim();
+                        // Animation nhẹ cho input
+                        inputField.style.transform = 'scale(1.03)';
+                        inputField.style.borderColor = 'rgba(255,255,255,0.7)';
+                        setTimeout(() => {
+                            inputField.style.transform = 'scale(1)';
+                            inputField.style.borderColor = 'rgba(255,255,255,0.25)';
+                        }, 200);
+                        findNextWords(); // Tự động tìm kiếm sau khi dán
+                    } else {
+                        alert("📋 Clipboard trống! Hãy sao chép một từ trước.");
+                    }
+                } catch (err) {
+                    // Nếu không có quyền đọc clipboard, hiển thị thông báo và focus vào input để người dùng paste thủ công
+                    alert("🔒 Không thể tự động đọc clipboard. Vui lòng dán thủ công (Ctrl+V) vào ô nhập.");
+                    inputField.focus();
+                }
+            }
+
+            // Gán sự kiện cho nút Dán
+            pasteBtn.addEventListener('click', function(e) {
+                createLiquidRipple(e, this);
+                autoPasteAndSearch();
+            });
+
+            // Hỗ trợ tổ hợp phím Ctrl+Shift+V để dán và tìm
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+                    e.preventDefault();
+                    autoPasteAndSearch();
+                }
+            });
+
+            // ============ CHỨC NĂNG TÌM KIẾM ============
+            searchBtn.addEventListener("click", function(e) {
+                createLiquidRipple(e, this);
+                findNextWords();
+            });
+
+            inputField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    // Tạo ripple nhỏ trên input
+                    createLiquidRipple(event, inputField);
+                    findNextWords();
+                }
+            });
+
+            // Khi focus vào input, nếu trống thì có thể gợi ý auto paste (hiển thị tooltip hoặc tự động)
+            inputField.addEventListener('focus', function() {
+                // Nếu input trống, có thể thử đọc clipboard 1 lần (tùy chọn, nhưng có thể gây phiền)
+                // Chúng ta chỉ highlight placeholder thôi
+                this.placeholder = "Nhập hoặc bấm 📋 Dán...";
+            });
+            inputField.addEventListener('blur', function() {
+                this.placeholder = "Nhập từ của đối thủ...";
+            });
+
+            function findNextWords() {
+                if (dictionary.length === 0) {
+                    alert("⏳ Kho dữ liệu chưa tải xong, vui lòng đợi!");
+                    return;
+                }
+
+                const word = inputField.value.trim().toLowerCase();
+                if (!word) {
+                    alert("📝 Vui lòng nhập từ của đối thủ!");
+                    inputField.focus();
+                    // Rung nhẹ input để báo lỗi
+                    inputField.style.animation = 'shake 0.4s ease';
+                    setTimeout(() => inputField.style.animation = '', 400);
+                    return;
+                }
+
+                const parts = word.split(/\s+/);
+                const lastSyllable = parts[parts.length - 1];
+                const prefix = lastSyllable + " ";
+
+                const matchedWords = dictionary.filter(dictWord => dictWord.startsWith(prefix));
+                displayResults(matchedWords);
+
+                // Animation nhẹ cho container khi có kết quả
+                container.style.transform = 'scale(1.01)';
+                setTimeout(() => container.style.transform = 'scale(1)', 150);
+            }
+
+            function displayResults(wordsArray) {
+                resultsList.innerHTML = "";
+                resultCount.textContent = `🔍 ${wordsArray.length} từ`;
+
+                if (wordsArray.length === 0) {
+                    const li = document.createElement("li");
+                    li.className = "empty-msg";
+                    li.textContent = "😔 Không tìm thấy từ nào để nối.";
+                    resultsList.appendChild(li);
+                    return;
+                }
+
+                wordsArray.forEach((word, index) => {
+                    const li = document.createElement("li");
+                    li.textContent = word;
+                    // Hiệu ứng xuất hiện tuần tự
+                    li.style.opacity = '0';
+                    li.style.transform = 'translateX(20px)';
+                    li.style.transition = `all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1.2) ${index * 0.03}s`;
+                    // Kích hoạt animation sau khi thêm vào DOM
+                    setTimeout(() => {
+                        li.style.opacity = '1';
+                        li.style.transform = 'translateX(0)';
+                    }, 10);
+
+                    // Nhấp vào để Copy + hiệu ứng liquid
+                    li.addEventListener("click", function(e) {
+                        createLiquidRipple(e, this);
+                        navigator.clipboard.writeText(word).then(() => {
+                            const originalText = this.textContent;
+                            this.textContent = "✅ Đã copy!";
+                            this.classList.add("copied-flash");
+                            setTimeout(() => {
+                                this.textContent = originalText;
+                                this.classList.remove("copied-flash");
+                            }, 900);
+                        }).catch(() => {
+                            // Fallback nếu clipboard API lỗi
+                            const textarea = document.createElement('textarea');
+                            textarea.value = word;
+                            document.body.appendChild(textarea);
+                            textarea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textarea);
+                            const originalText = this.textContent;
+                            this.textContent = "✅ Đã copy!";
+                            this.classList.add("copied-flash");
+                            setTimeout(() => {
+                                this.textContent = originalText;
+                                this.classList.remove("copied-flash");
+                            }, 900);
+                        });
+                    });
+
+                    resultsList.appendChild(li);
+                });
+            }
+
+            // Thêm keyframe shake nếu chưa có
+            const shakeStyle = document.createElement('style');
+            shakeStyle.textContent = `
+            @keyframes shake {
+              0%,100% { transform: translateX(0); }
+              25% { transform: translateX(-6px); }
+              50% { transform: translateX(6px); }
+              75% { transform: translateX(-4px); }
+            }
+          `;
+            document.head.appendChild(shakeStyle);
+
+            // Tự động focus input khi load trang (trải nghiệm mượt)
+            setTimeout(() => {
+                inputField.focus();
+            }, 600);
+
+            console.log('💧 Liquid Glass Nối Từ Tool đã sẵn sàng!');
+            console.log('📋 Dùng nút "Dán" hoặc Ctrl+Shift+V để auto-paste & tìm.');
+        })();
+    </script>
 </body>
 </html>
