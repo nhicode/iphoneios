@@ -2,84 +2,30 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone 15 Pro 3D Siêu Thực</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tool Gợi Ý Nối Từ</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="scene">
-        <div class="phone">
-            <div class="button action-button"></div>
-            <div class="button volume-up"></div>
-            <div class="button volume-down"></div>
-            <div class="button side-button"></div>
-
-            <div class="antenna antenna-top-left"></div>
-            <div class="antenna antenna-top-right"></div>
-            <div class="antenna antenna-bottom-left"></div>
-            <div class="antenna antenna-bottom-right"></div>
-
-            <div class="bezel">
-                
-                <div class="screen">
-                    <div class="wallpaper"></div>
-                    
-                    <div class="dynamic-island">
-                        <div class="camera-lens"></div>
-                        <div class="sensor"></div>
-                    </div>
-
-                    <div class="status-bar">
-                        <div class="time">10:09</div>
-                        <div class="icons">
-                            <div class="signal">
-                                <span></span><span></span><span></span><span></span>
-                            </div>
-                            <div class="wifi">
-                                <svg viewBox="0 0 24 24" fill="white" width="14px" height="14px"><path d="M12 21L15.6 16.2C14.6 15.4 13.4 15 12 15C10.6 15 9.4 15.4 8.4 16.2L12 21ZM12 11C8.9 11 6.2 12.2 4.1 14.1L6 16.6C7.6 15 9.7 14 12 14C14.3 14 16.4 15 18 16.6L19.9 14.1C17.8 12.2 15.1 11 12 11ZM12 7C7.6 7 3.6 8.7 0.5 11.5L2.4 14C4.9 11.7 8.3 10 12 10C15.7 10 19.1 11.7 21.6 14L23.5 11.5C20.4 8.7 16.4 7 12 7Z"></path></svg>
-                            </div>
-                            <div class="battery">
-                                <div class="battery-level"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="notifications">
-                        <div class="notification">
-                            <div class="noti-avatar" style="background-image: url('https://i.pravatar.cc/100?img=5');"></div>
-                            <div class="noti-content">
-                                <div class="noti-head">
-                                    <span class="noti-name">Sarah</span>
-                                    <span class="noti-time">1m ago</span>
-                                </div>
-                                <div class="noti-text">Are you free tonight? 🥂</div>
-                            </div>
-                        </div>
-                        <div class="notification">
-                            <div class="noti-avatar" style="background: #25D366; display: flex; justify-content: center; align-items: center;">💬</div>
-                            <div class="noti-content">
-                                <div class="noti-head">
-                                    <span class="noti-name">Messages</span>
-                                    <span class="noti-time">Now</span>
-                                </div>
-                                <div class="noti-text">You have 3 new messages</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lock-controls">
-                        <div class="lock-btn">🔦</div>
-                        <div class="lock-btn">📷</div>
-                    </div>
-
-                    <div class="home-bar"></div>
-                </div>
-
-                <div class="screen-glass"></div>
-            </div>
+    <div class="container">
+        <h2>🔍 Tool Hack Nối Từ</h2>
+        
+        <div class="input-group">
+            <input type="text" id="opponent-word" placeholder="Nhập từ của đối thủ (VD: thời tiết)..." autocomplete="off">
+            <button id="search-btn">Tìm Từ</button>
         </div>
+
+        <div class="results-header">
+            <span>Kết quả gợi ý:</span>
+            <span id="result-count">0 từ</span>
+        </div>
+        
+        <ul id="results-list" class="results-list">
+            <!-- Các từ gợi ý sẽ hiện ở đây -->
+            <li class="empty-msg">Chưa có dữ liệu. Hãy nhập từ để tìm!</li>
+        </ul>
     </div>
 
+    <script src="script.js"></script>
 </body>
 </html>
