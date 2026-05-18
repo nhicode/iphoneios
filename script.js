@@ -1,5 +1,6 @@
 (function() {
-    const DICT_URL = "https://cdn.jsdelivr.net/gh/winstonleedev/tudien/tudien.txt";
+    // URL CDN jsDelivr cho từ điển Viet74K.txt
+    const DICT_URL = "https://cdn.jsdelivr.net/gh/duyet/vietnamese-wordlist@master/Viet74K.txt";
     let dictionary = [];
     let isReady = false;
 
@@ -17,11 +18,14 @@
             const resp = await fetch(DICT_URL);
             if (!resp.ok) throw new Error("Lỗi mạng");
             const text = await resp.text();
+            
+            // Tách từ theo dòng mới (file mỗi từ một dòng)
             dictionary = text.split("\n")
-                .map(w => w.trim().toLowerCase().replace(/_/g, " "))
-                .filter(w => w.split(/\s+/).length === 2);
+                .map(w => w.trim().toLowerCase())
+                .filter(w => w.length > 0);
+            
             isReady = true;
-            resultCount.textContent = `📚 ${dictionary.length} từ`;
+            resultCount.textContent = `📚 ${dictionary.length.toLocaleString()} từ`;
             resultsList.innerHTML = '<li class="empty-msg">✅ Sẵn sàng – Chạm màn hình để dán từ</li>';
         } catch (e) {
             resultCount.textContent = "⚠️ Lỗi";
@@ -29,7 +33,7 @@
         }
     }
 
-    // ========== Tìm từ ==========
+    // ========== Tìm từ nối ==========
     function findAndDisplay() {
         if (!isReady) return;
         const raw = input.value.trim().toLowerCase();
@@ -40,23 +44,25 @@
         }
 
         const lastWord = raw.split(/\s+/).pop();
-        const prefix = lastWord + " ";
-        const matches = dictionary.filter(w => w.startsWith(prefix));
+        // Tìm tất cả từ bắt đầu bằng từ cuối (nối từ)
+        const matches = dictionary.filter(w => w.startsWith(lastWord));
 
         const fragment = document.createDocumentFragment();
-        resultCount.textContent = `🔍 ${matches.length} từ`;
+        resultCount.textContent = `🔍 ${matches.length.toLocaleString()} từ`;
         if (matches.length === 0) {
             const li = document.createElement("li");
             li.className = "empty-msg";
             li.textContent = "😔 Không tìm thấy từ nối";
             fragment.appendChild(li);
         } else {
-            matches.forEach((word, idx) => {
+            // Giới hạn hiển thị tối đa 200 từ để tránh lag
+            const displayWords = matches.slice(0, 200);
+            displayWords.forEach((word, idx) => {
                 const li = document.createElement("li");
                 li.textContent = word;
                 li.style.opacity = '0';
                 li.style.transform = 'translateY(10px)';
-                li.style.transition = `all 0.25s ease ${idx * 0.025}s`;
+                li.style.transition = `all 0.25s ease ${idx * 0.02}s`;
                 li.addEventListener("click", (e) => {
                     e.stopPropagation();
                     copyWord(word, li);
@@ -76,14 +82,14 @@
         });
     }
 
-    // Debounce
+    // Debounce khi gõ tay
     let debounceTimer;
     function onInput() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(findAndDisplay, 350);
+        debounceTimer = setTimeout(findAndDisplay, 300);
     }
 
-    // ========== Copy ==========
+    // ========== Copy từ ==========
     async function copyWord(word, element) {
         try {
             await navigator.clipboard.writeText(word);
@@ -104,7 +110,7 @@
         }, 900);
     }
 
-    // ========== Tự động dán ==========
+    // ========== Tự động dán clipboard ==========
     async function attemptAutoPaste() {
         if (!isReady) return;
         if (input.value.trim()) return;
@@ -132,7 +138,6 @@
         input.focus();
     }
 
-    // Hiển thị/ẩn nút clear
     function updateClearButton() {
         if (input.value.trim().length > 0) {
             clearBtn.classList.add("visible");
@@ -141,7 +146,7 @@
         }
     }
 
-    // ========== Ripple ==========
+    // ========== Ripple chất lỏng ==========
     function createRipple(e) {
         const ripple = document.createElement("span");
         ripple.className = "ripple";
@@ -182,14 +187,12 @@
         onInput();
     });
 
-    // Nút xoá
     clearBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // tránh trigger auto-paste
+        e.stopPropagation();
         clearInput();
     });
 
     // Khởi động
     loadDictionary();
-    // Kiểm tra ban đầu
     updateClearButton();
 })();
